@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # Set OpenAI API key using the SDK's dedicated method
-openai.api_key = "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"
+OPENAI_KEY = st.secrets["openai"]["key"]
 
 # Set up the Streamlit app
 def main():
