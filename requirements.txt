@@ -1,4 +1,8 @@
 openai==0.27.8
 requests==2.31.0
 streamlit==1.27.0
+<<<<<<< HEAD
 beautifulsoup4==4.12.2
+=======
+beautifulsoup4==4.12.2
+>>>>>>> 4c927e56caede2fef5cff8c895eadd4ee545c00d
