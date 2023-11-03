@@ -3,13 +3,10 @@ import streamlit as st
 import openai
 import requests
 from bs4 import BeautifulSoup
+import toml
 
 # Set OpenAI API key using the SDK's dedicated method
-<<<<<<< HEAD
 OPENAI_KEY = st.secrets["openai"]["key"]
-=======
-openai.api_key = "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"
->>>>>>> 4c927e56caede2fef5cff8c895eadd4ee545c00d
 
 # Set up the Streamlit app
 def main():
