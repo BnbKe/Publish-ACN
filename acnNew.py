@@ -10,10 +10,6 @@ import toml
 api_key = st.secrets["OPENAI_API_KEY"]
 openai.api_key=api_key
 
-#st.write(
-   # os.environ["key"] == st.secrets["key"])
-
-
 # Set up the Streamlit app
 def main():
     st.title('ACN GPT Analyst')
