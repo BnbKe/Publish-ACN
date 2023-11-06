@@ -5,8 +5,12 @@ import requests
 from bs4 import BeautifulSoup
 import toml
 
+
 # Set OpenAI API key using the SDK's dedicated method
-OPENAI_KEY = st.secrets["openai"]["key"]
+st.write("My OpenAI Key:", st.secrets["OPENAI-KEY"]["key"])
+#st.write(
+   # os.environ["key"] == st.secrets["key"])
+
 
 # Set up the Streamlit app
 def main():
