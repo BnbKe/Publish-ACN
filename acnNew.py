@@ -7,7 +7,7 @@ import toml
 
 
 # Set OpenAI API key using the SDK's dedicated method
-st.write("My OpenAI Key:", st.secrets["OPENAI-KEY"]["key"])
+st.write("My OpenAI Key:", st.secrets["OPENAI_KEY"]["key"])
 #st.write(
    # os.environ["key"] == st.secrets["key"])
 
