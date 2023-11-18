@@ -23,7 +23,7 @@ openai.api_key=api_key
   # Replace with your OpenAI API key
 openai.api_key = api_key
 
-model = "gpt-4"
+model = "gpt-3.5-turbo"
 
 # Hide 'Made with Streamlit' footer
 st.markdown("""
