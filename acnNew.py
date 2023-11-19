@@ -34,6 +34,10 @@ os.makedirs('Saved Chats', exist_ok=True)
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_file_path = os.path.join('Chat Logs', f'log_{timestamp}.txt')
 
+# Initialize session state for typed query history
+if 'typed_query_history' not in st.session_state:
+    st.session_state.typed_query_history = []
+    
 # Google Scholar scraping function for peer-reviewed research
 def scrape_google_scholar(query):
     url = "https://scholar.google.com/scholar?q=" + "+".join(query.split())
@@ -118,7 +122,7 @@ def download_csv(df):
 # Main function with multi-page setup
 def main():
     st.sidebar.image("ACN_LOGO.webp", caption='ACN', use_column_width=True)
-    page = st.sidebar.radio('Choose a section', ['Home with Chatbot', 'Data Analysis', 'Peer-reviewed Research', 'Query History'])
+    page = st.sidebar.radio('Choose a section', ['Home with Chatbot', 'Data Analysis', 'Peer-reviewed Research'])
 
     if page == 'Home with Chatbot':
         display_home_with_chatbot()
@@ -126,8 +130,10 @@ def main():
         display_data_analysis()
     elif page == 'Peer-reviewed Research':
         display_peer_reviewed_research()
-    elif page == 'Query History':
-        display_query_history()
+
+def display_home_with_chatbot():
+    st.title('Welcome to ACN GPT Analyst - Chatbot')
+    handle_chatbot_queries()
 
 def display_home_with_chatbot():
     st.title('Welcome to ACN GPT Analyst - Chatbot')
