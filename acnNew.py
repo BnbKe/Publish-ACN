@@ -34,10 +34,6 @@ os.makedirs('Saved Chats', exist_ok=True)
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_file_path = os.path.join('Chat Logs', f'log_{timestamp}.txt')
 
-# Initialize session state for typed query history
-if 'typed_query_history' not in st.session_state:
-    st.session_state.typed_query_history = []
-
 # Google Scholar scraping function for peer-reviewed research
 def scrape_google_scholar(query):
     url = "https://scholar.google.com/scholar?q=" + "+".join(query.split())
@@ -187,23 +183,6 @@ def handle_chatbot_queries():
         for source_data in response_data["responses"]:
             st.write(source_data['response'])
         st.session_state.typed_query_history.append(response_data)
-
-def display_query_history():
-    st.title('Query History')
-    display_typed_query_history()
-
-def display_typed_query_history():
-    clear_typed_query_history = st.sidebar.button("Clear Typed Query History")
-    if clear_typed_query_history:
-        st.session_state.typed_query_history = []
-    for i, entry in enumerate(st.session_state.typed_query_history):
-        query = entry["user_query"]
-        for source_data in entry["responses"]:
-            source_name = source_data["name"]
-            source_response = source_data["response"]
-            if st.sidebar.button(f"{i + 1}. {source_name}: {query}", key=f"typed_query_history_button_{i}_{source_name}"):
-                st.write(f"Response for '{query}' from {source_name}:")
-                st.write(source_response)
 
 if __name__ == "__main__":
     main()
