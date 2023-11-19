@@ -41,14 +41,28 @@ if 'typed_query_history' not in st.session_state:
 # Google Scholar scraping function for peer-reviewed research
 def scrape_google_scholar(query):
     url = "https://scholar.google.com/scholar?q=" + "+".join(query.split())
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    headers = {'User-Agent': 'Mozilla/5.0'}  # Mimic a browser request
     response = requests.get(url, headers=headers)
+
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
-        titles = soup.find_all('h3', class_='gs_rt')
-        return [title.get_text() for title in titles]
+        articles = []
+
+        # Iterate through each search result item
+        for item in soup.find_all('div', class_='gs_ri'):
+            title = item.find('h3', class_='gs_rt').get_text() if item.find('h3', class_='gs_rt') else "No title available"
+            link = item.find('a', href=True)['href'] if item.find('a', href=True) else "No link available"
+            author_info = item.find('div', class_='gs_a').get_text() if item.find('div', class_='gs_a') else "No author info available"
+
+            articles.append({
+                'title': title,
+                'link': link,
+                'author_info': author_info
+            })
+        return articles
     else:
-        return "Failed to retrieve data"
+        return "Failed to retrieve data with status code: " + str(response.status_code)
+
 
 # Data analysis functions
 def generate_bar_chart(df, column):
@@ -154,11 +168,14 @@ def display_peer_reviewed_research():
     query = st.text_input('Enter your research query for peer-reviewed articles:')
     if query:
         results = scrape_google_scholar(query)
-        if results != "Failed to retrieve data":
-            for title in results:
-                st.write(title)
+        if isinstance(results, list) and results:
+            for article in results:
+                st.write(f"Title: {article['title']}")
+                st.write(f"Author Info: {article['author_info']}")
+                if article['link'] != "No link available":
+                    st.markdown(f"[Read More]({article['link']})")
         else:
-            st.error("Failed to retrieve data from Google Scholar")
+            st.error(results)
 
 def handle_chatbot_queries():
     user_query = st.text_input('Ask anything about Africans in the US:', '')
