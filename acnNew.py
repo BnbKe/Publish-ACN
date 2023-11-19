@@ -114,4 +114,69 @@ def download_csv(df):
 
 # Main function with multi-page setup
 def main():
-    st.sidebar.image("ACN_LOG
+    st.sidebar.image("ACN_LOGO.webp", caption='ACN', use_column_width=True)
+    page = st.sidebar.radio('Choose a section', ['Home', 'Data Analysis', 'Research', 'Chatbot', 'Query History'])
+
+    if page == 'Home':
+        display_home()
+    elif page == 'Data Analysis':
+        display_data_analysis()
+    elif page == 'Research':
+        display_research()
+    elif page == 'Chatbot':
+        display_chatbot()
+    elif page == 'Query History':
+        display_query_history()
+
+def display_home():
+    st.title('Welcome to ACN GPT Analyst')
+
+def display_data_analysis():
+    st.title('Data Analysis Tools')
+    # Implement data analysis tools here
+
+def display_research():
+    st.title('Research')
+    query = st.text_input('Enter your research query:')
+    if query:
+        results = scrape_google_scholar(query)
+        if results != "Failed to retrieve data":
+            for title in results:
+                st.write(title)
+        else:
+            st.error("Failed to retrieve data from Google Scholar")
+
+def display_chatbot():
+    st.title('Chatbot')
+    handle_chatbot_queries()
+
+def display_query_history():
+    st.title('Query History')
+    display_typed_query_history()
+
+def handle_chatbot_queries():
+    user_query = st.text_input('Ask anything about Africans in the US:', '')
+    if user_query:
+        response_data = {"user_query": user_query, "responses": []}
+        response_obj = openai.ChatCompletion.create(model="gpt-4", messages=[{"role": "user", "content": user_query}])
+        response = response_obj['choices'][0]['message']['content']
+        response_data["responses"].append({"name": "OpenAI", "response": response})
+        for source_data in response_data["responses"]:
+            st.write(source_data['response'])
+        st.session_state.typed_query_history.append(response_data)
+
+def display_typed_query_history():
+    clear_typed_query_history = st.sidebar.button("Clear Typed Query History")
+    if clear_typed_query_history:
+        st.session_state.typed_query_history = []
+    for i, entry in enumerate(st.session_state.typed_query_history):
+        query = entry["user_query"]
+        for source_data in entry["responses"]:
+            source_name = source_data["name"]
+            source_response = source_data["response"]
+            if st.sidebar.button(f"{i + 1}. {source_name}: {query}", key=f"typed_query_history_button_{i}_{source_name}"):
+                st.write(f"Response for '{query}' from {source_name}:")
+                st.write(source_response)
+
+if __name__ == "__main__":
+    main()
