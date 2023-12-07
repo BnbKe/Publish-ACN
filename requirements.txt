@@ -10,4 +10,4 @@ scikit-learn==1.0.2
 requests==2.27.1
 beautifulsoup4==4.12.2
 PyPDF2==2.11.2
-
+langchain==0.0.347
