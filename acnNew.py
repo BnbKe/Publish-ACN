@@ -24,9 +24,9 @@ from langchain.vectorstores.faiss import FAISS
 
 
 # Set OpenAI API key
-#api_key = st.secrets["OPENAI_API_KEY"]
-#openai.api_key = api_key
-OpenAI.api_key = "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"
+api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = api_key
+
 
 
 
