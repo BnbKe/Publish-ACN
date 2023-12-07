@@ -1,5 +1,4 @@
 import openai
-from langchain import OpenAI
 import datetime
 import os
 import streamlit as st
