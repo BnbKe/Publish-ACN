@@ -1,4 +1,5 @@
 import openai
+from langchain import OpenAI
 import datetime
 import os
 import streamlit as st
@@ -13,10 +14,21 @@ from sklearn.metrics import mean_squared_error, r2_score
 import base64
 import requests
 from bs4 import BeautifulSoup
+from pypdf import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains.question_answering import load_qa_chain
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores.faiss import FAISS
+
+
+
 
 # Set OpenAI API key
-api_key = st.secrets["OPENAI_API_KEY"]
-openai.api_key = api_key
+#api_key = st.secrets["OPENAI_API_KEY"]
+#openai.api_key = api_key
+OpenAI.api_key = "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"
+
+
 
 # Hide 'Made with Streamlit' footer
 st.markdown("""
@@ -78,6 +90,10 @@ def show_advanced_stats(df):
     st.write(df.skew())
     st.write("Kurtosis of each column:")
     st.write(df.kurtosis())
+    st.write("Summary of categorical columns:")
+    st.write(df.describe(include="O"))
+    st.write("Summary of numerical columns:")
+    st.write(df.describe())   
 
 def build_linear_regression_model(df):
     st.sidebar.subheader("Linear Regression Model")
@@ -97,6 +113,45 @@ def build_linear_regression_model(df):
         st.write("R^2 Score:", r2)
     else:
         st.sidebar.write("Not enough numeric columns for regression analysis.")
+        
+
+def download_csv(df):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="data.csv">Download CSV File</a>'
+    st.markdown(href, unsafe_allow_html=True)
+    
+ #Document analysis functions  
+def parse_pdf(file):
+    pdf = PdfReader(file)
+    output = []
+    for page in pdf.pages:
+        text = page.extract_text()
+        output.append(text)
+
+    return "\n\n".join(output)
+
+def embed_text(text):
+    """Split the text and embed it in a FAISS vector store"""
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=800, chunk_overlap=0, separators=["\n\n", ".", "?", "!", " ", ""]
+    )
+    texts = text_splitter.split_text(text)
+
+    embeddings = OpenAIEmbeddings()
+    index = FAISS.from_texts(texts, embeddings)
+
+    return index
+
+def get_answer(index, query):
+    """Returns answer to a query using langchain QA chain"""
+
+    docs = index.similarity_search(query)
+
+    chain = load_qa_chain(OpenAI(temperature=0))
+    answer = chain.run(input_documents=docs, question=query)
+
+    return answer
 
 def generate_seaborn_plot(df):
     st.sidebar.subheader("Seaborn Plot Options")
@@ -113,16 +168,10 @@ def generate_seaborn_plot(df):
         sns.boxplot(x=df[selected_column], ax=ax)
     st.pyplot(fig)
 
-def download_csv(df):
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="data.csv">Download CSV File</a>'
-    st.markdown(href, unsafe_allow_html=True)
-
 # Main function with multi-page setup
 def main():
     st.sidebar.image("ACN_LOGO.webp", caption='ACN', use_column_width=True)
-    page = st.sidebar.radio('Choose a section', ['Home with Chatbot', 'Data Analysis', 'Peer-reviewed Research'])
+    page = st.sidebar.radio('Choose a section', ['Home with Chatbot', 'Data Analysis', 'Peer-reviewed Research','Document QA'])
 
     if page == 'Home with Chatbot':
         display_home_with_chatbot()
@@ -130,14 +179,13 @@ def main():
         display_data_analysis()
     elif page == 'Peer-reviewed Research':
         display_peer_reviewed_research()
+    elif page == 'Document QA':
+        display_document_analysis()
 
 def display_home_with_chatbot():
     st.title('Welcome to ACN GPT Analyst - Chatbot')
     handle_chatbot_queries()
 
-def display_home_with_chatbot():
-    st.title('Welcome to ACN GPT Analyst - Chatbot')
-    handle_chatbot_queries()
 
 def display_data_analysis():
     st.title('Data Analysis Tools')
@@ -189,6 +237,17 @@ def handle_chatbot_queries():
         for source_data in response_data["responses"]:
             st.write(source_data['response'])
         st.session_state.typed_query_history.append(response_data)
+        
+def display_document_analysis():
+    st.title("Doc QA")
+    uploaded_file = st.file_uploader("Upload a pdf", type=["pdf"])
+    if uploaded_file is not None:
+        index = embed_text(parse_pdf(uploaded_file))
+        query = st.text_input("Ask a question about the document")
+        button = st.button("Submit")
+        if button:
+            st.write(get_answer(index, query))
+
 
 if __name__ == "__main__":
     main()
