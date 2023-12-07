@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import base64
 import requests
 from bs4 import BeautifulSoup
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.question_answering import load_qa_chain
 from langchain.embeddings import OpenAIEmbeddings
